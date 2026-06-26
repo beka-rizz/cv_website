@@ -110,9 +110,22 @@ function setLanguage(lang) {
   });
 }
 
+function isMobileNav() {
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function syncNavAccessibility(isOpen) {
+  if (isMobileNav()) {
+    siteNav.setAttribute("aria-hidden", String(!isOpen));
+  } else {
+    siteNav.removeAttribute("aria-hidden");
+  }
+}
+
 function closeNav() {
   navToggle.setAttribute("aria-expanded", "false");
   siteNav.classList.remove("is-open");
+  syncNavAccessibility(false);
   document.body.classList.remove("nav-open");
   document.body.style.overflow = "";
 }
@@ -121,8 +134,18 @@ navToggle.addEventListener("click", () => {
   const isOpen = navToggle.getAttribute("aria-expanded") === "true";
   navToggle.setAttribute("aria-expanded", String(!isOpen));
   siteNav.classList.toggle("is-open", !isOpen);
+  syncNavAccessibility(!isOpen);
   document.body.classList.toggle("nav-open", !isOpen);
   document.body.style.overflow = isOpen ? "" : "hidden";
+});
+
+window.addEventListener("resize", () => {
+  if (!isMobileNav()) {
+    closeNav();
+    siteNav.removeAttribute("aria-hidden");
+  } else if (!siteNav.classList.contains("is-open")) {
+    syncNavAccessibility(false);
+  }
 });
 
 document.body.addEventListener("click", (event) => {
@@ -172,3 +195,4 @@ const observer = new IntersectionObserver(
 sections.forEach((section) => observer.observe(section));
 
 setLanguage(detectLanguage());
+syncNavAccessibility(false);
