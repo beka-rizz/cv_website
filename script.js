@@ -4,8 +4,25 @@ const SUPPORTED_LANGS = ["ru", "en"];
 
 const navToggle = document.querySelector(".nav-toggle");
 const siteNav = document.querySelector(".site-nav");
+const navHome = siteNav.parentElement;
 const navLinks = siteNav.querySelectorAll("a");
 const langButtons = document.querySelectorAll("[data-lang]");
+
+function isMobileNav() {
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function mountMobileNav() {
+  if (isMobileNav() && siteNav.parentElement !== document.body) {
+    document.body.appendChild(siteNav);
+  }
+}
+
+function unmountMobileNav() {
+  if (siteNav.parentElement === document.body) {
+    navHome.appendChild(siteNav);
+  }
+}
 
 function getNested(obj, path) {
   return path.split(".").reduce((current, key) => current?.[key], obj);
@@ -110,50 +127,31 @@ function setLanguage(lang) {
   });
 }
 
-function isMobileNav() {
-  return window.matchMedia("(max-width: 767px)").matches;
-}
-
-function syncNavAccessibility(isOpen) {
-  if (isMobileNav()) {
-    siteNav.setAttribute("aria-hidden", String(!isOpen));
-  } else {
-    siteNav.removeAttribute("aria-hidden");
-  }
-}
-
 function closeNav() {
   navToggle.setAttribute("aria-expanded", "false");
   siteNav.classList.remove("is-open");
-  syncNavAccessibility(false);
-  document.body.classList.remove("nav-open");
   document.body.style.overflow = "";
+  unmountMobileNav();
 }
 
 navToggle.addEventListener("click", () => {
   const isOpen = navToggle.getAttribute("aria-expanded") === "true";
+
+  if (!isOpen && isMobileNav()) {
+    mountMobileNav();
+  }
+
   navToggle.setAttribute("aria-expanded", String(!isOpen));
   siteNav.classList.toggle("is-open", !isOpen);
-  syncNavAccessibility(!isOpen);
-  document.body.classList.toggle("nav-open", !isOpen);
   document.body.style.overflow = isOpen ? "" : "hidden";
+
+  if (isOpen) {
+    unmountMobileNav();
+  }
 });
 
 window.addEventListener("resize", () => {
   if (!isMobileNav()) {
-    closeNav();
-    siteNav.removeAttribute("aria-hidden");
-  } else if (!siteNav.classList.contains("is-open")) {
-    syncNavAccessibility(false);
-  }
-});
-
-document.body.addEventListener("click", (event) => {
-  if (
-    siteNav.classList.contains("is-open") &&
-    !siteNav.contains(event.target) &&
-    !navToggle.contains(event.target)
-  ) {
     closeNav();
   }
 });
@@ -195,4 +193,3 @@ const observer = new IntersectionObserver(
 sections.forEach((section) => observer.observe(section));
 
 setLanguage(detectLanguage());
-syncNavAccessibility(false);
