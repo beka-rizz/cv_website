@@ -84,9 +84,7 @@ img {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(250, 250, 250, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(250, 250, 250, 0.97);
   border-bottom: 1px solid var(--border);
 }
 
@@ -152,12 +150,19 @@ img {
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  width: 40px;
-  height: 40px;
-  padding: 8px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
   background: none;
   border: none;
+  border-radius: var(--radius);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+  background: var(--surface);
 }
 
 .nav-toggle span {
@@ -179,20 +184,39 @@ img {
 .site-nav {
   position: fixed;
   inset: var(--header-height) 0 0 0;
+  z-index: 99;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-md);
+  padding: var(--space-md);
   background: var(--bg);
+  border-top: 1px solid var(--border);
   transform: translateX(100%);
-  transition: transform 0.25s ease;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.25s ease, visibility 0.25s ease;
   order: 4;
   width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .site-nav.is-open {
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+body.nav-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 98;
+  background: rgba(26, 26, 26, 0.24);
+  pointer-events: auto;
 }
 
 .site-nav a {
@@ -791,13 +815,23 @@ img {
 
   .site-nav {
     position: static;
+    z-index: auto;
     flex-direction: row;
     transform: none;
+    visibility: visible;
+    pointer-events: auto;
     gap: var(--space-md);
+    padding: 0;
     background: transparent;
+    border-top: none;
     order: 2;
     width: auto;
     margin-left: auto;
+    overflow: visible;
+  }
+
+  body.nav-open::before {
+    display: none;
   }
 
   .site-nav a {

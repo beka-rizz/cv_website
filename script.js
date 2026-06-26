@@ -113,14 +113,26 @@ function setLanguage(lang) {
 function closeNav() {
   navToggle.setAttribute("aria-expanded", "false");
   siteNav.classList.remove("is-open");
+  document.body.classList.remove("nav-open");
   document.body.style.overflow = "";
 }
 
 navToggle.addEventListener("click", () => {
   const isOpen = navToggle.getAttribute("aria-expanded") === "true";
   navToggle.setAttribute("aria-expanded", String(!isOpen));
-  siteNav.classList.toggle("is-open");
+  siteNav.classList.toggle("is-open", !isOpen);
+  document.body.classList.toggle("nav-open", !isOpen);
   document.body.style.overflow = isOpen ? "" : "hidden";
+});
+
+document.body.addEventListener("click", (event) => {
+  if (
+    siteNav.classList.contains("is-open") &&
+    !siteNav.contains(event.target) &&
+    !navToggle.contains(event.target)
+  ) {
+    closeNav();
+  }
 });
 
 navLinks.forEach((link) => {
